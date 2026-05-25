@@ -27,3 +27,14 @@ CREATE TABLE IF NOT EXISTS books (
 
 CREATE INDEX IF NOT EXISTS books_bib_id_idx ON books(bib_id);
 CREATE UNIQUE INDEX IF NOT EXISTS books_bib_id_isbn_unique ON books(bib_id, isbn);
+
+-- ── Storage bucket for cover photos ─────────────────────────────────────────
+-- Run this separately to create the public covers bucket:
+
+-- INSERT INTO storage.buckets (id, name, public)
+-- VALUES ('covers', 'covers', true)
+-- ON CONFLICT (id) DO NOTHING;
+
+-- CREATE POLICY "Public access to covers" ON storage.objects
+--   FOR ALL USING (bucket_id = 'covers');
+

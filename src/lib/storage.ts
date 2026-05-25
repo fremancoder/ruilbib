@@ -158,6 +158,41 @@ export async function markBooksNotNew(bibId: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateBook(
+  bookId: string,
+  fields: Partial<Pick<Book, "title" | "author" | "description" | "genre" | "coverUrl">>
+): Promise<void> {
+  const row: Record<string, unknown> = {};
+  if (fields.title !== undefined) row.title = fields.title;
+  if (fields.author !== undefined) row.author = fields.author;
+  if (fields.description !== undefined) row.description = fields.description;
+  if (fields.genre !== undefined) row.genre = fields.genre;
+  if (fields.coverUrl !== undefined) row.cover_url = fields.coverUrl;
+
+  if (Object.keys(row).length === 0) return;
+  const { error } = await supabase.from("books").update(row).eq("id", bookId);
+  if (error) throw error;
+}
+
+export async function uploadCover(
+  bibId: string,
+  bookId: string,
+  blob: Blob
+): Promise<string> {
+  const path = `${bibId}/${bookId}.jpg`;
+  const { error: uploadError } = await supabase.storage
+    .from("covers")
+    .upload(path, blob, {
+      contentType: "image/jpeg",
+      upsert: true,
+    });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from("covers").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export async function updateBookData(
   bookId: string,
   data: {
